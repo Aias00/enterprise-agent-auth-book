@@ -46,7 +46,7 @@ CI实际运行Go1.24.3的 `go test -race -count=1 -v ./lab`：真实三服务HTT
 
 构建完整性逐章证明源Markdown、EPUB、静态网页全文一致。实验ZIP包含Go源文件、go.mod/sum、realm配置、演示脚本、README和LICENSE；对归档精确文件清单及每个字节校验，CI在新目录解压后再次运行实验。首次Go依赖下载需要网络。
 
-最终公网再次验收全部21篇320/390px，包含全部章节无JavaScript阅读、目录、翻页、浅色默认、低饱和深色、搜索、字号、存储不可用降级、下载与无JS异常。另真实跨《AI网关工程实践》页面验证aias-reader-theme的跨书持久化与标签页同步。报告见evidence/public-reader-v1.0.1.json。公网每篇article正文独立抓取，与当前源文规范化渲染逐篇比较通过，见evidence/public-fulltext-v1.0.1.json。
+最终公网再次验收全部21篇320/390px，包含全部章节无JavaScript阅读、目录、翻页、浅色默认、低饱和深色、搜索、字号、存储不可用降级、下载与无JS异常。另真实跨《AI 网关与模型路由实战》页面验证aias-reader-theme的跨书持久化与标签页同步。报告见evidence/public-reader-v1.0.1.json。公网每篇article正文独立抓取，与当前源文规范化渲染逐篇比较通过，见evidence/public-fulltext-v1.0.1.json。
 
 直接打开最终CI EPUB的OPF，creator=Aias00，rights为“Copyright © 2026 Aias00. 保留所有权利。第三方项目、规范与引用资料保留其各自权利。”；嵌入SVG封面作者为Aias00。实验ZIP的LICENSE、README及metadata.json已实际检查个人署名和保留权利声明。
 

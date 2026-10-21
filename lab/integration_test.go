@@ -86,6 +86,15 @@ func expect(t *testing.T, got, want int) {
 		t.Fatalf("HTTP got %d want %d", got, want)
 	}
 }
+func assertOrder(t *testing.T, f *fixture, token, status string, refund int) {
+	t.Helper()
+	code, result := call(t, f.api.URL+"/execute", token, readOp())
+	expect(t, code, 200)
+	if result["Status"] != status || result["Refund"] != float64(refund) {
+		t.Fatalf("persisted order state got %v; want Status=%s Refund=%d", result, status, refund)
+	}
+}
+
 func TestSignedHTTPBoundaries(t *testing.T) {
 	f := setup(t)
 	raw := login(t, f, "alice")
@@ -181,15 +190,18 @@ func TestApprovalBindingsAndReplay(t *testing.T) {
 	op := refundOp()
 	code, _ := call(t, f.api.URL+"/execute", token, op)
 	expect(t, code, 403)
+	assertOrder(t, f, token, "paid", 0)
 	op.Approval = approval(t, f, token, op)
 	changed := op
 	changed.Amount++
 	code, _ = call(t, f.api.URL+"/execute", token, changed)
 	expect(t, code, 403)
+	assertOrder(t, f, token, "paid", 0)
 	changed = op
 	changed.Note = "different note"
 	code, _ = call(t, f.api.URL+"/execute", token, changed)
 	expect(t, code, 403)
+	assertOrder(t, f, token, "paid", 0)
 	impostor := claimsFor("bob", "acme", "agent-demo", "business-api", 0, 30*time.Second)
 	f.a.mu.Lock()
 	f.a.people["bob"].Tenant = "acme"
@@ -197,6 +209,7 @@ func TestApprovalBindingsAndReplay(t *testing.T) {
 	other, _ := f.a.sign(impostor)
 	code, _ = call(t, f.api.URL+"/execute", other, op)
 	expect(t, code, 403)
+	assertOrder(t, f, token, "paid", 0)
 	// Permit a second actor in this fixture so the failure must come from approval binding, not the actor allowlist.
 	f.b.actors["different-agent"] = true
 	actor := claimsFor("alice", "acme", "different-agent", "business-api", 0, 30*time.Second)
@@ -208,16 +221,44 @@ func TestApprovalBindingsAndReplay(t *testing.T) {
 	if result["error"] != "approval_binding" {
 		t.Fatal(result)
 	}
+	assertOrder(t, f, token, "paid", 0)
 	code, _ = call(t, f.tool.URL+"/call", raw, op)
 	expect(t, code, 200)
+	assertOrder(t, f, token, "refunded", 1200)
 	code, _ = call(t, f.tool.URL+"/call", raw, op)
 	expect(t, code, 403)
+	assertOrder(t, f, token, "refunded", 1200)
 	// Reset object status to isolate the old approval from state-conflict protection.
 	f.b.mu.Lock()
 	f.b.objects["acme/orders/o-100"].Status = "paid"
 	f.b.mu.Unlock()
 	code, _ = call(t, f.api.URL+"/execute", token, op)
 	expect(t, code, 403)
+	assertOrder(t, f, token, "paid", 1200)
+	var records []Audit
+	status, err := requestJSON("GET", f.api.URL+"/audit", nil, devAdmin, &records)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expect(t, status, 200)
+	approvedRef, executedRef := "", ""
+	for _, event := range records {
+		if event.Action == "refund" && event.Decision == "allow" {
+			if event.Reason == "approved" {
+				approvedRef = event.ApprovalRef
+			}
+			if event.Reason == "executed" {
+				executedRef = event.ApprovalRef
+			}
+		}
+	}
+	if approvedRef == "" || approvedRef != executedRef {
+		t.Fatalf("approval audit association missing: approved=%q executed=%q", approvedRef, executedRef)
+	}
+	encoded, _ := json.Marshal(records)
+	if bytes.Contains(encoded, []byte(op.Approval)) {
+		t.Fatal("audit exposed usable approval identifier")
+	}
 }
 func TestApprovalExpiryRevocationAndConcurrency(t *testing.T) {
 	t.Run("expired", func(t *testing.T) {
@@ -230,6 +271,7 @@ func TestApprovalExpiryRevocationAndConcurrency(t *testing.T) {
 		f.b.mu.Unlock()
 		code, _ := call(t, f.api.URL+"/execute", token, op)
 		expect(t, code, 403)
+		assertOrder(t, f, token, "paid", 0)
 	})
 	t.Run("revoke and fresh credential cannot revive approval", func(t *testing.T) {
 		f := setup(t)
@@ -246,6 +288,7 @@ func TestApprovalExpiryRevocationAndConcurrency(t *testing.T) {
 		fresh := delegate(t, f, login(t, f, "alice"))
 		code, _ = call(t, f.api.URL+"/execute", fresh, op)
 		expect(t, code, 403)
+		assertOrder(t, f, fresh, "paid", 0)
 	})
 	t.Run("one atomic consumption", func(t *testing.T) {
 		f := setup(t)
@@ -275,6 +318,7 @@ func TestApprovalExpiryRevocationAndConcurrency(t *testing.T) {
 		if allowed != 1 {
 			t.Fatalf("mutations %d", allowed)
 		}
+		assertOrder(t, f, token, "refunded", 1200)
 	})
 }
 func TestKeyRotationAndDependencyOutage(t *testing.T) {

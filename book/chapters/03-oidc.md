@@ -8,7 +8,7 @@ OpenID Connect 在 OAuth 2.0 之上提供认证层。ID Token 面向客户端表
 
 ## 真实 Keycloak 路径运行什么
 
-仓库包含 `lab/keycloak-realm.json`，在隔离容器中导入 book realm、两个机密客户端和服务账户。agent-tool 获得 agent-order-reader 角色，untrusted-tool 没有该角色。两个客户端都关闭标准浏览器流程和密码授权，只开启服务账户。我们实际请求 `/protocol/openid-connect/token` 的 client_credentials，随后从 discovery 确认 issuer 和固定 JWKS URI，下载 RSA 公钥并验签。
+仓库包含 `lab/keycloak-realm.json`，在隔离容器中导入 book realm、两个机密客户端和服务账户。两个服务账户都获得 agent-order-reader 角色，但只有 agent-tool 被允许映射；角色通过显式请求的可选 roles scope 进入令牌。两个客户端都关闭标准浏览器流程和密码授权，只开启服务账户。我们实际请求 `/protocol/openid-connect/token` 的 client_credentials，随后从 discovery 确认 issuer 和固定 JWKS URI，下载 RSA 公钥并验签。
 
 令牌的 audience 由显式 audience mapper 加入 tool-proxy。服务身份适配器检查 RS256、issuer、audience、expiry、issued-at、非空 subject、authorized party 和业务角色，然后执行 Acme 订单只读策略。对于相同的真实签发令牌，更改预期 audience 必须失败；请求其他 realm 也必须失败。测试等待十二秒的实验令牌真实到期，确认随后被拒绝，再获取新令牌恢复成功。
 
@@ -37,7 +37,7 @@ discovery 是配置发现工具，不是从任意用户输入学习信任根的�
 
 ## 为什么还要验证客户端与角色
 
-一个 realm 通常包含多个应用。只验证 issuer 会让同一 realm 中任何合法令牌都有机会到达你的代理；只验证 audience，又可能让被错误配置 audience mapper 的客户端混进来。本书进一步检查 authorized party 与角色，明确只有 agent-tool 服务账户具备本地映射资格。untrusted-tool 同样得到真实签名、同样面向 tool-proxy，却因为不满足映射被拒绝。
+一个 realm 通常包含多个应用。只验证 issuer 会让同一 realm 中任何合法令牌都有机会到达你的代理；只验证 audience，又可能让被错误配置 audience mapper 的客户端混进来。本书进一步检查 authorized party 与角色，明确只有 agent-tool 服务账户具备本地映射资格。untrusted-tool 同样得到真实签名、相同角色和 tool-proxy 受众，却因为客户端不匹配被拒绝；agent-tool 不请求 roles scope 时，客户端匹配但角色缺失，也必须拒绝。
 
 这不是建议所有产品都机械使用同样字段。不同身份平台对于客户端标识、服务账户和角色的声明有不同语义，应以实际文档和令牌样本为准。映射的本质是把外部身份事实转换成内部权限边界，并让该转换可审核。客户端凭据授权尤其需要注意，它表达的是应用自身，不能因为令牌含有一个 subject 就解释成真人登录。
 

@@ -464,6 +464,7 @@ func (b *Business) handler() http.Handler {
 		}
 		id := randomID()
 		b.approvals[id] = &Approval{Hash: digest(op), Subject: c.Subject, Actor: c.Actor, Tenant: c.Tenant, Epoch: c.Epoch, Expires: time.Now().Add(45 * time.Second)}
+		op.Approval = id // Audit stores only its digest, matching the later execution event.
 		b.record(c, op, "allow", "approved")
 		writeJSON(w, 200, map[string]string{"approval": id})
 	})

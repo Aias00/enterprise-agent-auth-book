@@ -32,10 +32,11 @@
           }
         }
       ],
-      "defaultClientScopes": [
+      "defaultClientScopes": [],
+      "fullScopeAllowed": true,
+      "optionalClientScopes": [
         "roles"
-      ],
-      "fullScopeAllowed": true
+      ]
     },
     {
       "clientId": "untrusted-tool",
@@ -58,10 +59,11 @@
           }
         }
       ],
-      "defaultClientScopes": [
+      "defaultClientScopes": [],
+      "fullScopeAllowed": true,
+      "optionalClientScopes": [
         "roles"
-      ],
-      "fullScopeAllowed": true
+      ]
     }
   ],
   "users": [
@@ -76,7 +78,10 @@
     {
       "username": "service-account-untrusted-tool",
       "enabled": true,
-      "serviceAccountClientId": "untrusted-tool"
+      "serviceAccountClientId": "untrusted-tool",
+      "realmRoles": [
+        "agent-order-reader"
+      ]
     }
   ],
   "clientScopes": [

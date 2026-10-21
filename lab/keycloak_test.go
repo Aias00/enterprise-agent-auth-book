@@ -3,19 +3,22 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 )
 
-func keycloakToken(t *testing.T, realm, clientID string) string {
+func keycloakToken(t *testing.T, realm, clientID, scope string) string {
 	t.Helper()
 	form := url.Values{"grant_type": {"client_credentials"}, "client_id": {clientID}, "client_secret": {"public-keycloak-dev-secret"}}
-	resp, e := http.PostForm(realm+"/protocol/openid-connect/token", form)
+	if scope != "" {
+		form.Set("scope", scope)
+	}
+	resp, e := client.PostForm(realm+"/protocol/openid-connect/token", form)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -23,9 +26,9 @@ func keycloakToken(t *testing.T, realm, clientID string) string {
 	var out struct {
 		Token string `json:"access_token"`
 	}
-	data, _ := io.ReadAll(resp.Body)
+	data, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if json.Unmarshal(data, &out) != nil || resp.StatusCode != 200 || out.Token == "" {
-		t.Fatalf("keycloak token %d %s", resp.StatusCode, data)
+		t.Fatalf("keycloak token endpoint rejected/invalid response: HTTP=%d bytes=%d", resp.StatusCode, len(data))
 	}
 	return out.Token
 }
@@ -37,7 +40,7 @@ func TestRealKeycloakWorkload(t *testing.T) {
 	f := setup(t)
 	p := httptest.NewServer(keycloakProxy(realm, f.api.URL, f.a))
 	defer p.Close()
-	token := keycloakToken(t, realm, "agent-tool")
+	token := keycloakToken(t, realm, "agent-tool", "roles")
 	claims, e := verifyKeycloak(token, realm, "tool-proxy")
 	if e != nil {
 		t.Fatal(e)
@@ -58,8 +61,19 @@ func TestRealKeycloakWorkload(t *testing.T) {
 	expect(t, code, 403)
 	code, _ = call(t, p.URL+"/call", token, refundOp())
 	expect(t, code, 403)
-	untrusted := keycloakToken(t, realm, "untrusted-tool")
+	untrusted := keycloakToken(t, realm, "untrusted-tool", "roles")
+	untrustedClaims, err := verifyKeycloak(untrusted, realm, "tool-proxy")
+	if err != nil || untrustedClaims.AuthorizedParty == "agent-tool" || !slices.Contains(untrustedClaims.RealmAccess.Roles, "agent-order-reader") {
+		t.Fatal("untrusted client test requires valid credential and role but different azp")
+	}
 	code, _ = call(t, p.URL+"/call", untrusted, readOp())
+	expect(t, code, 403)
+	noRole := keycloakToken(t, realm, "agent-tool", "")
+	noRoleClaims, err := verifyKeycloak(noRole, realm, "tool-proxy")
+	if err != nil || noRoleClaims.AuthorizedParty != "agent-tool" || slices.Contains(noRoleClaims.RealmAccess.Roles, "agent-order-reader") {
+		t.Fatal("missing role test requires authorized client but absent role")
+	}
+	code, _ = call(t, p.URL+"/call", noRole, readOp())
 	expect(t, code, 403)
 	remaining := time.Until(claims.ExpiresAt.Time) + time.Second
 	if remaining > 25*time.Second {
@@ -68,7 +82,7 @@ func TestRealKeycloakWorkload(t *testing.T) {
 	time.Sleep(remaining)
 	code, _ = call(t, p.URL+"/call", token, readOp())
 	expect(t, code, 401)
-	fresh := keycloakToken(t, realm, "agent-tool")
+	fresh := keycloakToken(t, realm, "agent-tool", "roles")
 	code, _ = call(t, p.URL+"/call", fresh, readOp())
 	expect(t, code, 200)
 }

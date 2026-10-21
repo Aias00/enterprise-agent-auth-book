@@ -197,10 +197,17 @@ func TestApprovalBindingsAndReplay(t *testing.T) {
 	other, _ := f.a.sign(impostor)
 	code, _ = call(t, f.api.URL+"/execute", other, op)
 	expect(t, code, 403)
+	// Permit a second actor in this fixture so the failure must come from approval binding, not the actor allowlist.
+	f.b.actors["different-agent"] = true
 	actor := claimsFor("alice", "acme", "different-agent", "business-api", 0, 30*time.Second)
 	other, _ = f.a.sign(actor)
-	code, _ = call(t, f.api.URL+"/execute", other, op)
+	code, _ = call(t, f.api.URL+"/execute", other, readOp())
+	expect(t, code, 200)
+	code, result := call(t, f.api.URL+"/execute", other, op)
 	expect(t, code, 403)
+	if result["error"] != "approval_binding" {
+		t.Fatal(result)
+	}
 	code, _ = call(t, f.tool.URL+"/call", raw, op)
 	expect(t, code, 200)
 	code, _ = call(t, f.tool.URL+"/call", raw, op)

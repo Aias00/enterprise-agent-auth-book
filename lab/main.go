@@ -351,6 +351,7 @@ type Audit struct {
 	ApprovalRef string `json:"approval_ref,omitempty"`
 }
 type Business struct {
+	actors    map[string]bool // Immutable allowlist configured before serving.
 	mu        sync.Mutex
 	objects   map[string]*Object
 	approvals map[string]*Approval
@@ -359,7 +360,7 @@ type Business struct {
 }
 
 func newBusiness(authority string) *Business {
-	return &Business{authority: authority, objects: map[string]*Object{
+	return &Business{authority: authority, actors: map[string]bool{"agent-demo": true}, objects: map[string]*Object{
 		"acme/orders/o-100":  {Tenant: "acme", Kind: "orders", ID: "o-100", Status: "paid"},
 		"beta/orders/o-200":  {Tenant: "beta", Kind: "orders", ID: "o-200", Status: "paid"},
 		"acme/tickets/t-100": {Tenant: "acme", Kind: "tickets", ID: "t-100", Status: "open"},
@@ -394,7 +395,7 @@ func (b *Business) authorize(raw string, op Operation) (*Claims, string) {
 	if !live(c, b.authority) {
 		return c, "revoked_or_unavailable"
 	}
-	if c.Actor != "agent-demo" {
+	if !b.actors[c.Actor] {
 		return c, "actor"
 	}
 	if !validOperation(op) {

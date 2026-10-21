@@ -83,6 +83,15 @@ const fs = require('node:fs');
       await plain.waitForURL('**/' + second.slug + '.html');
     }
     assert.equal(await plain.evaluate(() => document.documentElement.scrollWidth), 320);
+    for (const width of [320, 390]) {
+      await plain.setViewportSize({ width, height: 844 });
+      for (const chapter of info.chapters) {
+        await plain.goto(base + 'chapters/' + chapter.slug + '.html');
+        assert.equal((await plain.locator('article h1').innerText()).trim(), chapter.title);
+        assert((await plain.locator('article').innerText()).length > 50);
+        assert((await plain.evaluate(() => document.documentElement.scrollWidth)) <= width);
+      }
+    }
     await native.close();
     const blocked = await browser.newContext();
     await blocked.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new Error('Storage disabled'); } }));
@@ -100,7 +109,7 @@ const fs = require('node:fs');
     console.log(JSON.stringify({ result: 'PASS', url: base, chapters: info.chapter_count,
       checks: ['light default under dark OS', 'EPUB links', 'static chapters', 'search', 'font persistence',
         'shared theme key and tab sync', 'mobile native contents menu', 'all chapters at 320/390px',
-        'no-JS reading and pagination', 'storage denied', 'downloads', 'no JS errors'], widths, screenshots }));
+        'all chapters without JS at 320/390px and pagination', 'storage denied', 'downloads', 'no JS errors'], widths, screenshots }));
     await context.close();
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

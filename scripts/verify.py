@@ -128,6 +128,12 @@ def main():
     for record, chapter in zip(search, expected):
         assert normalized(record['text']) == normalized(''.join(docs[(SITE / 'chapters' / (chapter['slug'] + '.html')).resolve()].content))
     with zipfile.ZipFile(SITE / 'downloads/lab.zip') as archive:
+        packaged = {p.relative_to(ROOT).as_posix(): p for p in build.lab_files()}
+        packaged.update({name: ROOT / name for name in ['README.md', 'LICENSE']})
+        assert len(archive.namelist()) == len(set(archive.namelist())), 'Duplicate archive entries'
+        assert set(archive.namelist()) == set(packaged), 'Archive inventory differs'
+        for name, path in packaged.items():
+            assert archive.read(name) == path.read_bytes(), ('Archive source differs', name)
         for name, digest in info['lab_files'].items():
             assert build.sha((ROOT / name).read_bytes()) == digest == build.sha(archive.read(name))
     ET.fromstring((SITE / 'assets/cover.svg').read_text())

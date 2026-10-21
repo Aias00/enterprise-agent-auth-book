@@ -59,7 +59,7 @@ def metadata() -> dict:
     meta.setdefault('version', '1.0.0')
     meta.setdefault('description', meta['title'])
     meta.setdefault('date', date.today().isoformat())
-    meta.setdefault('rights', 'Copyright © 2026 Aias00. 原创内容与第三方引用的授权范围见仓库说明。')
+    meta.setdefault('rights', 'Copyright © 2026 Aias00. 保留所有权利。第三方资料保留其各自权利。')
     meta.setdefault('include_code', True)
     owner, repository = meta['repository'].split('/')
     default_site = f'https://{owner.lower()}.github.io/'

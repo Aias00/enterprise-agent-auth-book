@@ -1,6 +1,6 @@
 # 企业 Agent 工具接入：身份委托、授权与审计
 
-作者：Apache ShenYu PMC。面向 Go、Java、网关与 Agent 工程师，18章中文正文超过25000汉字，前言、官方来源/术语/练习与构建时生成的完整代码附录。
+作者：Aias00（Apache ShenYu PMC 成员，Go、Java 与 Agent 工程背景）。面向 Go、Java、网关与 Agent 工程师，18章中文正文超过25000汉字，前言、官方来源/术语/练习与构建时生成的完整代码附录。
 
 - [在线阅读](https://aias00.github.io/enterprise-agent-auth-book/)
 - [EPUB下载](https://aias00.github.io/enterprise-agent-auth-book/downloads/enterprise-agent-auth-book.epub)
@@ -38,4 +38,4 @@ EPUBCheck5.4以警告即失败模式运行。CI还会解压实验包再次测试
 
 ## 授权
 
-原创正文使用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)，署名Apache ShenYu PMC；代码及通用出版工具使用Apache-2.0，见LICENSE。第三方规范和产品文档保留各自权利；引用链接与取读哈希在book/sources.json，本仓库不发布其原始缓存。本书为作者技术作品，不代表Apache软件基金会的官方安全保证。
+原创正文、实验代码、出版工具与图形的版权归 Aias00 所有：© 2026 Aias00，保留所有权利。允许个人下载、阅读及本地运行随书实验；其他复制、分发、改编或商业使用须事先获得作者书面许可，详见 LICENSE。公开可访问不构成开源授权。第三方项目、依赖、规范和产品文档保留各自权利；引用链接与取读哈希在 book/sources.json，本仓库不发布其原始缓存。Apache ShenYu PMC 是作者个人背景，本书不代表 Apache ShenYu PMC 或 Apache 软件基金会的集体创作、官方立场或安全保证。

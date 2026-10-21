@@ -156,6 +156,10 @@ func TestTenantScopeAndUntrustedToolInput(t *testing.T) {
 	op.ID = "../o-200"
 	code, _ = call(t, f.tool.URL+"/call", raw, op)
 	expect(t, code, 403)
+	op = readOp()
+	op.ID = business
+	code, _ = call(t, f.api.URL+"/execute", business, op)
+	expect(t, code, 403)
 	// Bearer secrets and untrusted note content never enter the structured audit.
 	var audit any
 	status, e := requestJSON("GET", f.api.URL+"/audit", nil, devAdmin, &audit)

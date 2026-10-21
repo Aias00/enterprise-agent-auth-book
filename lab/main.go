@@ -372,7 +372,7 @@ func digest(op Operation) string {
 	return hex.EncodeToString(v[:])
 }
 func validOperation(op Operation) bool {
-	if len(op.Note) > 512 || strings.ContainsAny(op.ID+op.Tenant, "/\\\r\n") || op.ID == "" || op.Tenant == "" {
+	if len(op.ID) > 80 || len(op.Tenant) > 80 || len(op.Note) > 512 || strings.ContainsAny(op.ID+op.Tenant, "/\\\r\n") || op.ID == "" || op.Tenant == "" {
 		return false
 	}
 	return (op.Kind == "orders" && ((op.Action == "read" && op.Amount == 0) || (op.Action == "refund" && op.Amount > 0 && op.Amount <= 10000))) || (op.Kind == "tickets" && op.Action == "close" && op.Amount == 0)
@@ -409,7 +409,19 @@ func (b *Business) authorize(raw string, op Operation) (*Claims, string) {
 	return c, ""
 }
 func (b *Business) record(c *Claims, op Operation, decision, reason string) {
-	a := Audit{RequestID: randomID(), Object: op.Kind + "/" + op.ID, Action: op.Action, Decision: decision, Reason: reason}
+	a := Audit{RequestID: randomID(), Action: op.Action, Decision: decision, Reason: reason}
+	// Only resolved server-owned object identifiers enter the audit verbatim.
+	// Unknown/rejected identifiers may contain secrets or personal text.
+	key := op.Tenant + "/" + op.Kind + "/" + op.ID
+	if _, ok := b.objects[key]; ok && validOperation(op) {
+		a.Object = op.Kind + "/" + op.ID
+	} else {
+		sum := sha256.Sum256([]byte(key))
+		a.Object = "unresolved:" + hex.EncodeToString(sum[:8])
+	}
+	if op.Action != "read" && op.Action != "refund" && op.Action != "close" {
+		a.Action = "invalid"
+	}
 	if c != nil {
 		a.Subject = c.Subject
 		a.Actor = c.Actor

@@ -1,0 +1,17 @@
+{
+ "title":"企业 Agent 工具接入：身份委托、授权与审计",
+ "short_title":"企业 Agent 工具接入",
+ "subtitle":"从真实身份、业务对象到可撤销执行的工程实践",
+ "author":"Apache ShenYu PMC",
+ "lang":"zh-CN",
+ "repository":"Aias00/enterprise-agent-auth-book",
+ "slug":"enterprise-agent-auth-book",
+ "version":"1.0.0",
+ "date":"2026-10-21",
+ "description":"面向 Go、Java 与 Agent 工程师，沿真实 HTTP 实验建立身份、租户、对象授权、审批、撤权和审计的完整执行边界。",
+ "cover_label":"ENTERPRISE AGENT ENGINEERING",
+ "cover_lines":["企业 Agent","工具接入","身份委托、授权","与审计"],
+ "cover_subtitle":"身份 · 业务对象 · 可撤销执行",
+ "rights":"Copyright © 2026 Apache ShenYu PMC. 正文 CC BY 4.0，代码 Apache-2.0；第三方标准保留各自权利。",
+ "include_code":true
+}

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "oauth-bcp",
+    "title": "OAuth 2.0 Security Best Current Practice",
+    "url": "https://www.rfc-editor.org/rfc/rfc9700.html",
+    "retrieved": "2026-10-21",
+    "sha256": "c00e2234fcd79581bc29669c60d693afaa42f67d9205bddee848f757ae975419",
+    "bytes": 261599
+  },
+  {
+    "id": "jwt-bcp",
+    "title": "JSON Web Token Best Current Practices",
+    "url": "https://www.rfc-editor.org/rfc/rfc8725.html",
+    "retrieved": "2026-10-21",
+    "sha256": "7f93df8a106c14e2c9394bd3fc12a488266477c89a1fe2f9182cf0bdb02d7ce0",
+    "bytes": 89311
+  },
+  {
+    "id": "jwt-profile",
+    "title": "JSON Web Token Profile for OAuth 2.0 Access Tokens",
+    "url": "https://www.rfc-editor.org/rfc/rfc9068.html",
+    "retrieved": "2026-10-21",
+    "sha256": "03f9f0f2090864299fa2779dd4129824859017165a0ae99f90669d7084a1712f",
+    "bytes": 104974
+  },
+  {
+    "id": "exchange",
+    "title": "OAuth 2.0 Token Exchange",
+    "url": "https://www.rfc-editor.org/rfc/rfc8693.html",
+    "retrieved": "2026-10-21",
+    "sha256": "cad0eccfa08d8c57eb096c2750e6cc783f8697b8771558943971fa58caff0fca",
+    "bytes": 145221
+  },
+  {
+    "id": "introspection",
+    "title": "OAuth 2.0 Token Introspection",
+    "url": "https://www.rfc-editor.org/rfc/rfc7662.html",
+    "retrieved": "2026-10-21",
+    "sha256": "8c36ce5246215c16fac436fafda277ee0638566b7610aa5cc6673388009445d7",
+    "bytes": 46520
+  },
+  {
+    "id": "oidc",
+    "title": "OpenID Connect Core 1.0",
+    "url": "https://openid.net/specs/openid-connect-core-1_0.html",
+    "retrieved": "2026-10-21",
+    "sha256": "4d016752a645e8a3c259baa4173b5a90cb6c82898ce868fc8444adde262a5aed",
+    "bytes": 437508
+  },
+  {
+    "id": "keycloak",
+    "title": "Keycloak Securing Applications and Services",
+    "url": "https://www.keycloak.org/securing-apps/oidc-layers",
+    "retrieved": "2026-10-21",
+    "sha256": "0c523e251c9300ec3ead2f89e450cf957c5b9d0323bd5a2518cd70e982ea78c6",
+    "bytes": 44699
+  },
+  {
+    "id": "keycloak-service",
+    "title": "Keycloak Server Administration Guide",
+    "url": "https://www.keycloak.org/docs/latest/server_admin/",
+    "retrieved": "2026-10-21",
+    "sha256": "a6529adb8c9e217ef74ead3f9789348533a9db9dd19d480b54281e78d583f884",
+    "bytes": 2063653
+  },
+  {
+    "id": "mcp-auth",
+    "title": "MCP Authorization",
+    "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization",
+    "retrieved": "2026-10-21",
+    "sha256": "f00bf352bf9755bc5751b0f0982c081418fbca7559012fbaa61d8f2aca7e193a",
+    "bytes": 629514
+  },
+  {
+    "id": "mcp-security",
+    "title": "MCP Security Best Practices",
+    "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices",
+    "retrieved": "2026-10-21",
+    "sha256": "e988b6b312675767a58d936842bae9d5da6ece36422a0094486732607c21f688",
+    "bytes": 542081
+  },
+  {
+    "id": "dpop",
+    "title": "OAuth 2.0 Demonstrating Proof of Possession",
+    "url": "https://www.rfc-editor.org/rfc/rfc9449.html",
+    "retrieved": "2026-10-21",
+    "sha256": "2d8657f072913d55627dc25c02d3ad305bd62bed7f06c78c7d0621768b234784",
+    "bytes": 220387
+  }
+]
